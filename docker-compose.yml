@@ -6,8 +6,8 @@ services:
     container_name: postgresTestDb
     env_file: .env
     environment:
-     POSTGRES_USER: frank
-     POSTGRES_PASSWORD: FeEmDeus7
-     POSTGRES_DB: testdb
+     POSTGRES_USER: ${POSTGRES_USER}
+     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+     POSTGRES_DB: ${POSTGRES_DB}
     ports:
       - "5433:5432"
