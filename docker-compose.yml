@@ -1,0 +1,13 @@
+
+services:
+
+  postgres:
+    image: postgres
+    container_name: postgresTestDb
+    env_file: .env
+    environment:
+     POSTGRES_USER: frank
+     POSTGRES_PASSWORD: FeEmDeus7
+     POSTGRES_DB: testdb
+    ports:
+      - "5433:5432"
