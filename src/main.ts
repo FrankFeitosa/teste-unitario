@@ -15,12 +15,22 @@ async function bootstrap() {
             transform: true, // Transforma os tipos automaticamente (ex: string para number)
         })
     );
+    
     // Configurações da documentação Swagger
     const config = new DocumentBuilder()
         .setTitle('API de Usuários')
         .setDescription('Documentação da API de usuários com NestJS + Prisma + Swagger')
         .setVersion('1.0')
         .addTag('users') // Tag opcional para categorizar as rotas
+        .addBearerAuth({
+            type: 'http',
+            scheme: 'bearer',
+            bearerFormat: 'JWT',
+            name: 'Authorization',
+            in: 'header',
+        })
+
+
         .build();
 
     const document = SwaggerModule.createDocument(app, config);

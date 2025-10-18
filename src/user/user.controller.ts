@@ -1,10 +1,14 @@
-import { Controller, Get, Post, Body, Param, Put, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Put, Delete, UseGuards } from '@nestjs/common';
 import { UsersService } from './user.service';
-import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-ser.dto';
+import { JwtAuthGuard } from '../auth/jwt.guard';
+import { AdminGuard } from '../auth/admin.guard';
+import { UsuarioComumGuard } from '../auth/usuario-comum.guard';
 
-@ApiTags('users')
+@UseGuards(JwtAuthGuard)
+@ApiBearerAuth()
 @Controller('users')
 export class UsersController {
    constructor(private readonly usersService: UsersService) { }
@@ -13,6 +17,8 @@ export class UsersController {
    @ApiOperation({ summary: 'Criar um novo usuário' })
    @ApiResponse({ status: 201, description: 'Usuário criado com sucesso.' })
    @ApiBody({ type: CreateUserDto })
+   @ApiBearerAuth()
+   @UseGuards(AdminGuard)
    create(@Body() data: CreateUserDto) {
       return this.usersService.create(data);
    }
@@ -20,6 +26,8 @@ export class UsersController {
    @Get()
    @ApiOperation({ summary: 'Listar todos os usuários' })
    @ApiResponse({ status: 200, description: 'Lista de usuários retornada com sucesso.' })
+   @ApiBearerAuth()
+   @UseGuards(UsuarioComumGuard)
    findAll() {
       return this.usersService.findAll()
    }
