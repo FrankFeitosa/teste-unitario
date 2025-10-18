@@ -17,11 +17,28 @@ model User{
   id String @id @default(uuid())
   name String 
   email String @unique
-  password String
+  password String?
+  googleId String? @unique
   role Role @default(USUARIO_COMUM)
 }
 
 enum Role{
   ADMIN
   USUARIO_COMUM
+}
+
+model Place {
+  id       String    @id @default(uuid())
+  name     String
+  type    placeType
+  phone    String
+  latitude Float
+  longitude Float
+  images    Json[]
+}
+
+enum placeType {
+  RESTAURANTE
+  BAR
+  HOTEL
 }
