@@ -12,6 +12,27 @@ export class PlaceService {
     private cloudinaryService: CloudinaryService,
   ) { }
 
+  async findPaginated(page: number, limit: number) {
+
+    const [places, total] = await this.prisma.$transaction([
+      this.prisma.place.findMany({
+        skip: (page - 1) * limit,
+        take: limit,
+        orderBy: { created_at: 'desc' }
+      }),
+      this.prisma.place.count()
+    ])
+
+    return {
+      data: places,
+      meta: {
+        total,
+        page,
+        lastPage: Math.ceil(total / limit)
+      }
+    }
+  }
+
   async findAll() {
     return this.prisma.place.findMany();
   }
@@ -25,7 +46,7 @@ export class PlaceService {
     if (!place) throw new BadRequestException('Local não encontrado');
 
     let images = place.images as ImageObject[];
-    
+
     // Se forem enviadas novas imagens
     if (newImages && newImages.length > 0) {
       // Deletar imagens antigas

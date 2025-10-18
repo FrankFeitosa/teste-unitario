@@ -9,14 +9,16 @@ import {
     UploadedFiles,
     UseInterceptors,
     BadRequestException,
+    Query
 } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { PlaceService } from './place.service';
 import { CloudinaryService } from './cloudinary.service';
 import { CreatePlaceDto } from './dto/create-place.dto';
 import { File as MulterFile } from 'multer';
-import { ApiBody, ApiConsumes, ApiResponse, ApiOperation } from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiResponse, ApiOperation, ApiQuery } from '@nestjs/swagger';
 import { UpdatePlaceDto } from './dto/update-place.dto';
+
 
 @Controller('places')
 export class PlaceController {
@@ -30,10 +32,21 @@ export class PlaceController {
         return this.placeService.findAll();
     }
 
+    @Get('pagineted')
+    @ApiOperation({ summary: "Listar locais paginados" })
+    @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
+    @ApiQuery({ name: 'limit', required: false, type: Number, example: 10 })
+    async findPaginated(@Query('page') page = 1, @Query('limit') limit = 10) {
+        const parsePage = Math.max(1, Number(page))
+        const parseLimit = Math.min(50, Math.max(1, Number(limit))) // Limmite de segurança
+        return this.placeService.findPaginated(parsePage, parseLimit)
+    }
+
     @Post()
     @UseInterceptors(FileFieldsInterceptor([{ name: 'images', maxCount: 3 }]))
     @ApiConsumes('multipart/form-data')
     @ApiOperation({ summary: 'Cadastrar novo local com imagens' })
+    @ApiResponse({ status: 201, description: 'Place criado com sucesso' })
     @ApiBody({
         description: 'Formulário com os dados do local + imagens',
         schema: {
@@ -56,7 +69,6 @@ export class PlaceController {
             },
         },
     })
-    @ApiResponse({ status: 201, description: 'Place criado com sucesso' })
     async createPlace(
         @Body() data: CreatePlaceDto,
         @UploadedFiles() files: { images?: MulterFile[] },
@@ -66,7 +78,7 @@ export class PlaceController {
         }
 
         const imageUrls = await Promise.all(
-            files.images.map((file) => this.cloudinaryService.uploadImage(file.buffer)),
+            files.images.map((file) => this.cloudinaryService.uploadImage(file.buffer),),
         );
 
         return this.placeService.create({
@@ -112,7 +124,7 @@ export class PlaceController {
 
     @Delete(':id')
     @ApiOperation({ summary: 'Deletar local e imagens no Cloudinary' })
-     @ApiResponse({ status: 200, description: 'Place deletado com sucesso' })
+    @ApiResponse({ status: 200, description: 'Place deletado com sucesso' })
     async deletePlace(@Param('id') id: string) {
         return this.placeService.delete(id);
     }
